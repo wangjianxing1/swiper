@@ -20,5 +20,6 @@ import user.api
 
 urlpatterns = [
     # path('admin/', admin.site.urls),
-    path('user/verify_code/', user.api.send_verify_code)
+    path('user/verify_code', user.api.get_verify_code),
+    path('user/login/', user.api.login)
 ]
