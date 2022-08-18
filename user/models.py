@@ -3,6 +3,7 @@ import datetime
 from django.db import models
 from django.utils.functional import cached_property
 
+from lib.orm import ModelMixin
 
 # Create your models here.
 
@@ -15,12 +16,12 @@ class User(models.Model):
     nickname = models.CharField(max_length=32, unique=True)
     phonenum = models.CharField(max_length=16, unique=True)
     sex = models.CharField(max_length=8, choices=SEX)
+    location = models.CharField(max_length=32)
+    avatar = models.CharField(max_length=256)
+
     birth_year = models.IntegerField(default=2000)
     birth_month = models.IntegerField(default=1)
     birth_day = models.IntegerField(default=1)
-    avatar = models.ImageField(max_length=256)
-    location = models.CharField(max_length=32)
-
     """年龄只计算一次，
     变成属性加在变量身上，
     和下面的配置项方法原理一样"""
@@ -38,13 +39,26 @@ class User(models.Model):
             self._profile, _ = Profile.objects.get_or_create(id=self.id)
         return self._profile
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'nickname': self.nickname,
+            'phonenum': self.phonenum,
+            'sex': self.sex,
+            'avatar': self.avatar,
+            'location': self.location,
+            'age': self.age,
+        }
 
-class Profile(models.Model):
+
+class Profile(models.Model, ModelMixin):
     """"用户配置项"""
     SEX = (
         ('M', '男'),
         ('F', '女'),
     )
+
+    dating_sex = models.CharField(default='女', max_length=8, choices=SEX, verbose_name='匹配性别')
     location = models.CharField(max_length=32, verbose_name='目标城市')
 
     min_distance = models.IntegerField(default=1, verbose_name='最小查找范围')
@@ -53,7 +67,8 @@ class Profile(models.Model):
     min_dating_age = models.IntegerField(default=18, verbose_name='最小交友年龄')
     max_dating_age = models.IntegerField(default=45, verbose_name='最大交友年龄')
 
-    dating_sex = models.CharField(default='女', max_length=8, choices=SEX, verbose_name='匹配性别')
+
     vibration = models.BooleanField(default=True, verbose_name='开启振动')
     only_matche = models.BooleanField(default=True, verbose_name='不让为匹配的人看我的相册')
     auto_play = models.BooleanField(default=True, verbose_name='自动播放视频')
+
