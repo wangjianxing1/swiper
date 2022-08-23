@@ -1,8 +1,12 @@
 # from django.shortcuts import render
+
 from lib.http import render_json
 from common import error
-from user.logic import send_verify_code, check_vcode
+from user.logic import send_verify_code, check_vcode, save_upload_file
 from user.models import User
+from user.forms import ProfileForm
+
+from swiper import settings
 
 # Create your views here.
 
@@ -35,9 +39,43 @@ def get_profile(request):
 
 def modify_profile(request):
     """修改个人资料"""
-    pass
+    # request.POST是一个字典
+    # if settings.DEBUG == True:
+    #     import json
+    #     data = json.loads(request.body)
+    # else:
+    #     data = request.POST
+    data = request.POST
+    form = ProfileForm(data)
+    if form.is_valid():
+        user = request.user
+        user.profile.__dict__.update(form.cleaned_data)
+        user.profile.save()
+        return render_json(None)
+    else:
+        return render_json(form.errors, error.PROFILE_ERROR)
 
 
 def upload_avatar(request):
     """头像上传"""
-    pass
+    try:
+        picture = request.FILES.get('avatar')
+        save_upload_file(request.user, picture)
+        return render_json(None)
+    except:
+        return render_json(None, error.PICTURE_NOT_FOUND)
+
+    # picture = request.FILES.get('avatar')
+    # if picture:
+    #     # save_upload_file(request.session['uid'],picture )
+    #     save_upload_file(request.user.id,picture )
+    #     return render_json(None)
+    # else:
+    #     return render_json(None, error.PICTURE_NOT_FOUND)
+
+
+
+
+
+
+

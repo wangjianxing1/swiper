@@ -23,4 +23,6 @@ urlpatterns = [
     path('user/verify_code', user.api.get_verify_code),
     path('user/login', user.api.login),
     path('user/profile', user.api.get_profile),
+    path('user/modify_profile', user.api.modify_profile),
+    path('user/avater/uploads', user.api.upload_avatar),
 ]

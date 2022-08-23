@@ -10,8 +10,8 @@ from lib.orm import ModelMixin
 class User(models.Model):
     """用户数据模型"""
     SEX = (
-        ('M', '男'),
-        ('F', '女'),
+        ('男', '男'),
+        ('女', '女'),
     )
     nickname = models.CharField(max_length=32, unique=True)
     phonenum = models.CharField(max_length=16, unique=True)
@@ -54,8 +54,8 @@ class User(models.Model):
 class Profile(models.Model, ModelMixin):
     """"用户配置项"""
     SEX = (
-        ('M', '男'),
-        ('F', '女'),
+        ('男', '男'),
+        ('女', '女'),
     )
 
     dating_sex = models.CharField(default='女', max_length=8, choices=SEX, verbose_name='匹配性别')
@@ -66,7 +66,6 @@ class Profile(models.Model, ModelMixin):
 
     min_dating_age = models.IntegerField(default=18, verbose_name='最小交友年龄')
     max_dating_age = models.IntegerField(default=45, verbose_name='最大交友年龄')
-
 
     vibration = models.BooleanField(default=True, verbose_name='开启振动')
     only_matche = models.BooleanField(default=True, verbose_name='不让为匹配的人看我的相册')
