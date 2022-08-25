@@ -27,10 +27,11 @@ urlpatterns = [
     path('user/modify_profile', user.api.modify_profile),
     path('user/avater/uploads', user.api.upload_avatar),
 
-    path('user/social/users', social.api.get_users),
-    path('user/social/like', social.api.like),
-    path('user/social/superlike', social.api.superlike),
-    path('user/social/dislike', social.api.dislike),
-    path('user/social/rewind', social.api.rewind),
+    path('social/users', social.api.get_users),
+    path('social/like', social.api.like),
+    path('social/superlike', social.api.superlike),
+    path('social/dislike', social.api.dislike),
+    path('social/rewind', social.api.rewind),
+    path('social/friends', social.api.friends),
 
 ]
