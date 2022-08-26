@@ -4,6 +4,7 @@ from django.db import models
 from django.utils.functional import cached_property
 
 from lib.orm import ModelMixin
+from vip.models import Vip
 
 # Create your models here.
 
@@ -22,12 +23,15 @@ class User(models.Model):
     birth_year = models.IntegerField(default=2000)
     birth_month = models.IntegerField(default=1)
     birth_day = models.IntegerField(default=1)
-    """年龄只计算一次，
-    变成属性加在变量身上，
-    和下面的配置项方法原理一样"""
+
+    vip_id = models.IntegerField(default=1)
 
     @cached_property
     def age(self):
+        """年龄只计算一次，
+            变成属性加在变量身上，
+            和下面的配置项方法原理一样
+        """
         today = datetime.date.today()
         birth_date = datetime.date(self.birth_year, self.birth_month, self.birth_day)
         return (today - birth_date).days // 365
@@ -38,6 +42,13 @@ class User(models.Model):
         if not hasattr(self, '_profile'):
             self._profile, _ = Profile.objects.get_or_create(id=self.id)
         return self._profile
+
+    @property
+    def vip(self):
+        """用户对应的VIP"""
+        if not hasattr(self, '_vip'):
+            self._vip = Vip.objects.get(id=self.vip_id)
+        return self._vip
 
     def to_dict(self):
         return {

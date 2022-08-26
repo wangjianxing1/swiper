@@ -2,6 +2,7 @@ from lib.http import render_json
 
 from social import logic
 from social.models import Friend
+from vip.logic import perm_require
 
 def get_users(request):
     """获取推荐列表"""
@@ -19,6 +20,7 @@ def like(request):
     is_matched = logic.like(request.user, sid)
     return render_json({'is_matched': is_matched})
 
+@perm_require('superlike')
 def superlike(request):
     """超级喜欢"""
     sid = int(request.POST.get('sid'))
@@ -31,6 +33,7 @@ def dislike(request):
     logic.dislike(request.user, sid)
     return render_json(None)
 
+@perm_require('rewind')
 def rewind(request):
     """反悔"""
     sid = int(request.POST.get('sid'))
