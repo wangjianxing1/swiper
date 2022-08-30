@@ -1,8 +1,12 @@
+import logging
+
 from lib.http import render_json
 
 from social import logic
 from social.models import Friend
 from vip.logic import perm_require
+
+log = logging.getLogger('inf')
 
 def get_users(request):
     """获取推荐列表"""
@@ -18,6 +22,7 @@ def like(request):
     """喜欢"""
     sid = int(request.POST.get('sid'))
     is_matched = logic.like(request.user, sid)
+    log.info(f'{request.user.id} like {sid}')
     return render_json({'is_matched': is_matched})
 
 @perm_require('superlike')
@@ -25,12 +30,14 @@ def superlike(request):
     """超级喜欢"""
     sid = int(request.POST.get('sid'))
     is_matched = logic.superlike(request.user, sid)
+    log.info(f'{request.user.id} superlike {sid}')
     return render_json({'is_matched': is_matched})
 
 def dislike(request):
     """不喜欢"""
     sid = int(request.POST.get('sid'))
     logic.dislike(request.user, sid)
+    log.info(f'{request.user.id} dislike {sid}')
     return render_json(None)
 
 @perm_require('rewind')

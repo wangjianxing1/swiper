@@ -9,12 +9,12 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
+import os
 
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
@@ -26,7 +26,6 @@ SECRET_KEY = 'django-insecure-sjz7f63hshyg9*o$#knm-oxdarzz#ev(x1@bgprz-#%c^a$s^e
 DEBUG = True
 """允许哪些网站过来访问"""
 ALLOWED_HOSTS = ['*']
-
 
 # Application definition
 
@@ -74,7 +73,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'swiper.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
@@ -82,9 +80,20 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    },
+    'db1': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db1.sqlite3',
+    },
+    'db2': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db2.sqlite3',
+    },
+    'db3': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db3.sqlite3',
+    },
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
@@ -104,7 +113,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
@@ -115,7 +123,6 @@ TIME_ZONE = 'Asia/Shanghai'
 USE_I18N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
@@ -128,3 +135,95 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_ROOT = 'medias'
+
+# 使用redis做缓存
+CACHES = {
+    # default 是缓存名，可以配置多个缓存
+    "default": {
+        # 应用 django-redis 库的 RedisCache 缓存类
+        "BACKEND": "django_redis.cache.RedisCache",
+        # 配置正确的 ip和port
+        "LOCATION": "redis://127.0.0.1:6379/4",
+        "OPTIONS": {
+            # redis客户端类
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "PICKLE_VERSION":-1,
+            # redis连接池的关键字参数
+            "CONNECTION_POOL_KWARGS": {
+                "max_connections": 100
+            }
+            # 如果 redis 设置了密码，那么这里需要设置对应的密码，如果redis没有设置密码，那么这里也不设置
+            # "PASSWORD": "123456",
+        }
+    }
+}
+
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,  # 是否禁用已经存在的日志器
+    'formatters': {  # 日志信息显示的格式
+        'verbose': {
+            'format': '%(asctime)s %(levelname)s [%(process)d-%(threadName)s] '
+                      '%(module)s.%(funcName)s line %(lineno)d: %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S'
+        },
+        'simple': {
+            'format': '%(asctime)s %(levelname)s %(module)s.%(funcName)s %(lineno)d %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S'
+        },
+    },
+    'filters': {  # 对日志进行过滤
+        'require_debug_true': {  # django在debug模式下才输出日志
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+    },
+    'handlers': {  # 日志处理方法
+        'console': {  # 向终端中输出日志
+            # 'level': 'INFO',
+            'level': 'DEBUG' if DEBUG else 'WARNING',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
+        'info': {  # 向文件中输出日志
+            'level': 'INFO',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, "logs/info.log"),  # 日志文件的位置
+            'when': 'D',  # 每天切割日志
+            'backupCount': 30,  # 日志保存30天
+            'formatter': 'verbose',
+        },
+        'error': {  # 向文件中输出日志
+            'level': 'WARNING',
+            # 'filename': os.path.join(os.path.dirname(BASE_DIR), "logs/error.log"),  # 日志文件的位置
+            'filename': f'{BASE_DIR}/logs/error.log',
+            # 'class': 'logging.handlers.RotatingFileHandler', # 按照日志文件大小来切分文件
+            # 'maxBytes': 300 * 1024 * 1024,
+            'class': 'logging.handlers.TimedRotatingFileHandler', # 按照日志文件时间来切分文件
+            'when': 'W0',  # 每周1切割日志
+            'backupCount': 4,  # 日志保存4周
+            'formatter': 'verbose',
+        },
+    },
+
+    'loggers': {  # 日志器
+        'django': {  # 定义了一个名为django的日志器
+            # 'handlers': ['console', 'file'],  # 可以同时向终端与文件中输出日志
+            'handlers': ['console'],
+            'propagate': True,  # 是否继续传递日志信息
+            'level': 'INFO',  # 日志器接收的最低日志级别
+        },
+        'inf': {
+            'handlers': ['info'],
+            'propagate': True,
+            'level': 'INFO',
+        },
+        'err': {
+            'handlers': ['error'],
+            'propagate': True,
+            'level': 'WARNING',
+        },
+    }
+}

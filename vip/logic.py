@@ -1,7 +1,10 @@
+import logging
+
 from vip.models import Vip
 from lib.http import render_json
 from common import error
 
+log = logging.getLogger('err')
 
 def perm_require(perm_name):
     """权限检查装饰器"""
@@ -14,6 +17,7 @@ def perm_require(perm_name):
                 response = view_func(request)
                 return response
             else:
+                log.error(f'{request.user.nickname} not has {perm_name}')
                 return render_json(None, error.NOT_HAS_PERM)
 
         return wrap
@@ -32,6 +36,7 @@ def perm_require1(perm_name):
                     response = view_func(request)
                     return response
                 else:
+                    log.error(f'{request.user.nickname} not has {perm_name}')
                     return render_json(None, error.NOT_HAS_PERM)
 
             return wrap
