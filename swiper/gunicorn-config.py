@@ -2,8 +2,8 @@
 # coding:utf-8
 from multiprocessing import cpu_count
 
-# 绑定的ip与端口
-bind = ['0.0.0.0:8000']#线上环境不会开启在公网IP下，一般使用内网IP
+# 绑定的ip与端口,gunicorn不对外暴露接口，不安全，所以其前方还需要一个nginx代理服务器
+bind = ['0.0.0.0:9000']#线上环境不会开启在公网IP下，一般使用内网IP
 # 是否设置守护进程,将进程交给supervisor管理
 daemon = True
 # 设置进程文件目录
